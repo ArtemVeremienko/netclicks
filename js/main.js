@@ -6,8 +6,6 @@ const leftMenu = document.querySelector('.left-menu'),
   tvShowsList = document.querySelector('.tv-shows__list'),
   modal = document.querySelector('.modal')
 
-let tempCardSrc; // для первоначального src картинок карточек
-
 // открытие/закрытие меню
 hamburger.addEventListener('click', () => {
   leftMenu.classList.toggle('openMenu');
@@ -31,29 +29,23 @@ leftMenu.addEventListener('click', () => {
   }
 });
 
-// при наведении на мышки на карточку, заменяет картинку
-tvShowsList.addEventListener('mouseover', event => {
+// функция для смены картинки карточки
+const changeImage = event => {
   const tvCard = event.target.closest('.tv-card');
   if (!tvCard) return;
 
   const tvCardImg = tvCard.querySelector('.tv-card__img');
 
   if (tvCardImg.dataset.backdrop) {
-    tempCardSrc = tvCardImg.src;
-    tvCardImg.src = tvCardImg.dataset.backdrop;
+    [tvCardImg.src, tvCardImg.dataset.backdrop] = [tvCardImg.dataset.backdrop, tvCardImg.src];
   }
-});
+};
+
+// при наведении на мышки на карточку, заменяет картинку
+tvShowsList.addEventListener('mouseover', changeImage);
 
 // при выходу мышки с карточки заменяет на начальную картинку
-tvShowsList.addEventListener('mouseout', event => {
-  const tvCard = event.target.closest('.tv-card');
-  if (!tvCard) return;
-
-  const tvCardImg = tvCard.querySelector('.tv-card__img');
-  if (tvCardImg.dataset.backdrop) {
-    tvCardImg.src = tempCardSrc;
-  }
-});
+tvShowsList.addEventListener('mouseout', changeImage);
 
 // открытие модального окна
 tvShowsList.addEventListener('click', event => {
