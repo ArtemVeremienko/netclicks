@@ -1,9 +1,10 @@
 'use strict';
 
 // меню
-const leftMenu = document.querySelector('.left-menu');
-const hamburger = document.querySelector('.hamburger');
-const tvShowsList = document.querySelector('.tv-shows__list');
+const leftMenu = document.querySelector('.left-menu'),
+  hamburger = document.querySelector('.hamburger'),
+  tvShowsList = document.querySelector('.tv-shows__list'),
+  modal = document.querySelector('.modal')
 
 let tempCardSrc; // для первоначального src картинок карточек
 
@@ -51,5 +52,16 @@ tvShowsList.addEventListener('mouseout', event => {
   const tvCardImg = tvCard.querySelector('.tv-card__img');
   if (tvCardImg.dataset.backdrop) {
     tvCardImg.src = tempCardSrc;
+  }
+});
+
+// открытие модального окна
+tvShowsList.addEventListener('click', event => {
+  const target = event.target;
+  const card = target.closest('.tv-card');
+
+  if (card) {
+    modal.classList.remove('hide');
+    document.body.style.overflow = 'hidden';
   }
 });
