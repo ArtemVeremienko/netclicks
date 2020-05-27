@@ -49,6 +49,7 @@ tvShowsList.addEventListener('mouseout', changeImage);
 
 // открытие модального окна
 tvShowsList.addEventListener('click', event => {
+  event.preventDefault(); // отключает прокрутку страницы вверх при клике на карточку
   const target = event.target;
   const card = target.closest('.tv-card');
 
