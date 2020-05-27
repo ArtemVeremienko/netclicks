@@ -65,3 +65,12 @@ tvShowsList.addEventListener('click', event => {
     document.body.style.overflow = 'hidden';
   }
 });
+
+// закрытие модального окна
+modal.addEventListener('click', event => {
+  const target = event.target;
+  if (target.classList.contains('modal') || target.closest('.cross')) {
+    modal.classList.add('hide');
+    document.body.style.overflow = '';
+  }
+});
