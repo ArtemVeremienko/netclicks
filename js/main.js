@@ -110,7 +110,8 @@ document.addEventListener('click', event => {
   }
 });
 
-leftMenu.addEventListener('click', () => {
+leftMenu.addEventListener('click', event => {
+  event.preventDefault();
   const target = event.target;
   const dropdown = target.closest('.dropdown');
   if (dropdown) {
