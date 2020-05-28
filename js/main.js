@@ -17,7 +17,8 @@ const leftMenu = document.querySelector('.left-menu'),
   modalLink = document.querySelector('.modal__link'),
   searchForm = document.querySelector('.search__form'),
   searchFormInput = searchForm.querySelector('.search__form-input'),
-  preloader = document.querySelector('.preloader');
+  preloader = document.querySelector('.preloader'),
+  dropdown = document.querySelectorAll('.dropdown');
 
 const loading = document.createElement('div');
 loading.className = 'loading';
@@ -97,16 +98,21 @@ searchForm.addEventListener('submit', event => {
   new DBService().getTestData().then(renderCard);
 }
 
+// закрытие пунктов меню
+const closeDropdown = () => dropdown.forEach(item => item.classList.remove('active'));
+
 // открытие/закрытие меню
 hamburger.addEventListener('click', () => {
   leftMenu.classList.toggle('openMenu');
   hamburger.classList.toggle('open');
+  closeDropdown();
 });
 
 document.addEventListener('click', event => {
   if (!event.target.closest('.left-menu')) {
     leftMenu.classList.remove('openMenu');
     hamburger.classList.remove('open');
+    closeDropdown();
   }
 });
 
@@ -146,7 +152,7 @@ tvShowsList.addEventListener('click', event => {
   const card = target.closest('.tv-card');
 
   if (card) {
-    preloader.style.display = 'block';
+    preloader.style.display = 'block'; // показать прелоадер при рендеринге модалки
     new DBService()
       .getTvShow(card.parentElement.idTV) // поднимаемся к элементу списка li
       .then(data => {
@@ -171,8 +177,8 @@ tvShowsList.addEventListener('click', event => {
       .then(() => {
         modal.classList.remove('hide');
         document.body.style.overflow = 'hidden';
-        preloader.style.display = 'none';
-      });
+      })
+      .finally(() => preloader.style.display = 'none');
   }
 });
 
