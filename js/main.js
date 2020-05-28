@@ -16,7 +16,8 @@ const leftMenu = document.querySelector('.left-menu'),
   description = document.querySelector('.description'),
   modalLink = document.querySelector('.modal__link'),
   searchForm = document.querySelector('.search__form'),
-  searchFormInput = searchForm.querySelector('.search__form-input');
+  searchFormInput = searchForm.querySelector('.search__form-input'),
+  preloader = document.querySelector('.preloader');
 
 const loading = document.createElement('div');
 loading.className = 'loading';
@@ -41,26 +42,27 @@ class DBService {
   getTvShow = id => this.getData(`${SERVER}/tv/${id}?api_key=${API_KEY}&language=ru-RU`);
 }
 
-const renderCard = response => {
+const renderCard = ({ results }) => {
   tvShowsList.textContent = '';
 
-  response.results.forEach(item => {
-    const {
-      backdrop_path: backdrop,
-      name: title,
-      poster_path: poster,
-      vote_average: vote,
-      id
-    } = item;
+  if (results.length) {
+    results.forEach(item => {
+      const {
+        backdrop_path: backdrop,
+        name: title,
+        poster_path: poster,
+        vote_average: vote,
+        id
+      } = item;
 
-    const posterIMG = poster ? IMG_URL + poster : 'img/no-poster.jpg';
-    const backdropIMG = backdrop ? IMG_URL + backdrop : '';
-    const voteElem = vote ? `<span class="tv-card__vote">${vote}</span>` : '';
+      const posterIMG = poster ? IMG_URL + poster : 'img/no-poster.jpg';
+      const backdropIMG = backdrop ? IMG_URL + backdrop : '';
+      const voteElem = vote ? `<span class="tv-card__vote">${vote}</span>` : '';
 
-    const card = document.createElement('li');
-    card.idTV = id;
-    card.className = 'tv-shows__item';
-    card.innerHTML = `
+      const card = document.createElement('li');
+      card.idTV = id;
+      card.className = 'tv-shows__item';
+      card.innerHTML = `
       <a href="#" class="tv-card">
           ${voteElem}
           <img class="tv-card__img"
@@ -69,9 +71,13 @@ const renderCard = response => {
           <h4 class="tv-card__head">${title}</h4>
       </a>
     `;
+      loading.remove();
+      tvShowsList.append(card);
+    });
+  } else {
     loading.remove();
-    tvShowsList.append(card);
-  });
+    tvShowsList.innerHTML = `<li class="tv-shows__search"><strong>По вашему запросу сериалов не найдено 😢</strong></li>`;
+  }
 
 
 }
@@ -139,6 +145,7 @@ tvShowsList.addEventListener('click', event => {
   const card = target.closest('.tv-card');
 
   if (card) {
+    preloader.style.display = 'block';
     new DBService()
       .getTvShow(card.parentElement.idTV) // поднимаемся к элементу списка li
       .then(data => {
@@ -163,6 +170,7 @@ tvShowsList.addEventListener('click', event => {
       .then(() => {
         modal.classList.remove('hide');
         document.body.style.overflow = 'hidden';
+        preloader.style.display = 'none';
       });
   }
 });
