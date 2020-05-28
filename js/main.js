@@ -27,6 +27,7 @@ loading.className = 'loading';
 
 class DBService {
   getData = async (url) => {
+    tvShows.append(loading); // добавляет прелоадер для всех запросов
     const res = await fetch(url);
     if (res.ok) {
       return res.json();
@@ -42,13 +43,17 @@ class DBService {
   getSearchResult = query => this.getData(`${SERVER}/search/tv?api_key=${API_KEY}&query=${query}&language=ru-RU`);
 
   getTvShow = id => this.getData(`${SERVER}/tv/${id}?api_key=${API_KEY}&language=ru-RU`);
+
+  getFiltered = filter => this.getData(`${SERVER}/tv/${filter}?api_key=${API_KEY}&language=ru-RU`);
 }
 
-const renderCard = ({ results }) => {
+const renderCard = (response, target) => {
+  const { results } = response;
+
   tvShowsList.textContent = '';
 
   if (results.length) {
-    tvShowsHead.textContent = 'Результат поиска:';
+    tvShowsHead.textContent = target ? target.textContent : 'Результат поиска';
     results.forEach(item => {
       const {
         backdrop_path: backdrop,
@@ -79,8 +84,7 @@ const renderCard = ({ results }) => {
     });
   } else {
     loading.remove();
-    tvShowsHead.textContent = '';
-    tvShowsList.innerHTML = `<li class="tv-shows__search"><strong>По вашему запросу сериалов не найдено 😢</strong></li>`;
+    tvShowsHead.textContent = 'По вашему запросу сериалов не найдено 😢';
   }
 
 
@@ -91,15 +95,13 @@ searchForm.addEventListener('submit', event => {
   const value = searchFormInput.value.trim();
   if (value) {
     searchFormInput.value = '';
-    tvShows.append(loading);
     new DBService().getSearchResult(value).then(renderCard);
   }
 });
 
-{
-  tvShows.append(loading);
-  new DBService().getTestData().then(renderCard);
-}
+// начальная страница с карточками
+new DBService().getTestData().then(renderCard);
+
 
 // закрытие пунктов меню
 const closeDropdown = () => dropdown.forEach(item => item.classList.remove('active'));
@@ -123,11 +125,23 @@ leftMenu.addEventListener('click', event => {
   event.preventDefault();
   const target = event.target;
   const dropdown = target.closest('.dropdown');
+
   if (dropdown) {
     dropdown.classList.toggle('active');
     leftMenu.classList.add('openMenu');
     hamburger.classList.add('open');
   }
+
+  if (target.closest('#top-rated')) {
+    new DBService().getFiltered('top_rated').then(response => renderCard(response, target));
+  } else if (target.closest('#popular')) {
+    new DBService().getFiltered('popular').then(response => renderCard(response, target));
+  } else if (target.closest('#week')) {
+    new DBService().getFiltered('on_the_air').then(response => renderCard(response, target));
+  } else if (target.closest('#today')) {
+    new DBService().getFiltered('airing_today').then(response => renderCard(response, target));
+  }
+
 });
 
 // функция для смены картинки карточки
