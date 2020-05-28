@@ -9,6 +9,7 @@ const leftMenu = document.querySelector('.left-menu'),
   tvShowsList = document.querySelector('.tv-shows__list'),
   modal = document.querySelector('.modal'),
   tvShows = document.querySelector('.tv-shows'),
+  tvShowsHead = tvShows.querySelector('.tv-shows__head'),
   tvCardImg = document.querySelector('.tv-card__img'),
   modalTitle = document.querySelector('.modal__title'),
   genresList = document.querySelector('.genres-list'),
@@ -47,6 +48,7 @@ const renderCard = ({ results }) => {
   tvShowsList.textContent = '';
 
   if (results.length) {
+    tvShowsHead.textContent = 'Результат поиска:';
     results.forEach(item => {
       const {
         backdrop_path: backdrop,
@@ -77,6 +79,7 @@ const renderCard = ({ results }) => {
     });
   } else {
     loading.remove();
+    tvShowsHead.textContent = '';
     tvShowsList.innerHTML = `<li class="tv-shows__search"><strong>По вашему запросу сериалов не найдено 😢</strong></li>`;
   }
 
