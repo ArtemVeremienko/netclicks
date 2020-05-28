@@ -474,6 +474,11 @@ main {
     margin: 15px 10px 30px;
 }
 
+.tv-shows__search {
+    font-size: 2em;
+    grid-column: 1 / -1;
+}
+
 .tv-card {
     position: relative;
     max-width: 185px;
