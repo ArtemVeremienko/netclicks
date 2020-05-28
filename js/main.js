@@ -152,6 +152,7 @@ leftMenu.addEventListener('click', event => {
   } else if (target.closest('#search')) {
     tvShowsList.textContent = '';
     tvShowsHead.textContent = '';
+    pagination.textContent = '';
     searchFormInput.focus();
   }
 
