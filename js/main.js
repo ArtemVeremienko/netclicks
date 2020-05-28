@@ -6,21 +6,39 @@ const API_KEY = '764f5f90718a44fc2bcf08b2dd691ef7';
 const leftMenu = document.querySelector('.left-menu'),
   hamburger = document.querySelector('.hamburger'),
   tvShowsList = document.querySelector('.tv-shows__list'),
-  modal = document.querySelector('.modal');
+  modal = document.querySelector('.modal'),
+  tvShows = document.querySelector('.tv-shows'),
+  tvCardImg = document.querySelector('.tv-card__img'),
+  modalTitle = document.querySelector('.modal__title'),
+  genresList = document.querySelector('.genres-list'),
+  rating = document.querySelector('.rating'),
+  description = document.querySelector('.description'),
+  modalLink = document.querySelector('.modal__link');
+
+const loading = document.createElement('div');
+loading.className = 'loading';
 
 
-const DBService = class {
+class DBService {
   getData = async (url) => {
     const res = await fetch(url);
     if (res.ok) {
       return res.json();
     } else {
-      throw new Error(`Не удалось получить данные по адресу ${url}`)
+      throw new Error(`Не удалось получить данные по адресу ${url}`);
     }
   }
 
   getTestData = () => {
     return this.getData('test.json');
+  }
+
+  getTestCard = () => {
+    return this.getData('card.json');
+  }
+
+  getSearchResult = () => {
+    return this.getData(`/search/company?api_key=`)
   }
 };
 
@@ -50,14 +68,17 @@ const renderCard = response => {
           <h4 class="tv-card__head">${title}</h4>
       </a>
     `;
+    loading.remove();
     tvShowsList.append(card);
   });
 
 
 }
 
-new DBService().getTestData()
-  .then(renderCard);
+{
+  tvShows.append(loading);
+  new DBService().getTestData().then(renderCard);
+}
 
 // открытие/закрытие меню
 hamburger.addEventListener('click', () => {
@@ -107,8 +128,30 @@ tvShowsList.addEventListener('click', event => {
   const card = target.closest('.tv-card');
 
   if (card) {
-    modal.classList.remove('hide');
-    document.body.style.overflow = 'hidden';
+    new DBService()
+      .getTestCard()
+      .then(data => {
+        console.log(data);
+        const {
+          poster_path,
+          name,
+          genres,
+          vote_average,
+          overview,
+          homepage
+        } = data;
+
+        tvCardImg.src = IMG_URL + poster_path;
+        modalTitle.textContent = name;
+        genresList.innerHTML = genres.reduce((acc, item) => `${acc}<li>${item.name}</li>`, '');
+        rating.textContent = vote_average;
+        description.textContent = overview;
+        modalLink.href = homepage;
+      })
+      .then(() => {
+        modal.classList.remove('hide');
+        document.body.style.overflow = 'hidden';
+      });
   }
 });
 
