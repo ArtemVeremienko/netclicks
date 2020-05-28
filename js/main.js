@@ -32,18 +32,14 @@ class DBService {
     }
   }
 
-  getTestData = () => {
-    return this.getData('test.json');
-  }
+  getTestData = () => this.getData('test.json');
 
-  getTestCard = () => {
-    return this.getData('card.json');
-  }
+  getTestCard = () => this.getData('card.json');
 
-  getSearchResult = (query) => {
-    return this.getData(`${SERVER}/search/tv?api_key=${API_KEY}&query=${query}&languege=ru-RU`)
-  }
-};
+  getSearchResult = query => this.getData(`${SERVER}/search/tv?api_key=${API_KEY}&query=${query}&language=ru-RU`);
+
+  getTvShow = id => this.getData(`${SERVER}/tv/${id}?api_key=${API_KEY}&language=ru-RU`);
+}
 
 const renderCard = response => {
   tvShowsList.textContent = '';
@@ -53,7 +49,8 @@ const renderCard = response => {
       backdrop_path: backdrop,
       name: title,
       poster_path: poster,
-      vote_average: vote
+      vote_average: vote,
+      id
     } = item;
 
     const posterIMG = poster ? IMG_URL + poster : 'img/no-poster.jpg';
@@ -61,6 +58,7 @@ const renderCard = response => {
     const voteElem = vote ? `<span class="tv-card__vote">${vote}</span>` : '';
 
     const card = document.createElement('li');
+    card.idTV = id;
     card.className = 'tv-shows__item';
     card.innerHTML = `
       <a href="#" class="tv-card">
@@ -142,7 +140,7 @@ tvShowsList.addEventListener('click', event => {
 
   if (card) {
     new DBService()
-      .getTestCard()
+      .getTvShow(card.parentElement.idTV) // поднимаемся к элементу списка li
       .then(data => {
         const {
           poster_path,
@@ -153,9 +151,11 @@ tvShowsList.addEventListener('click', event => {
           homepage
         } = data;
 
-        tvCardImg.src = IMG_URL + poster_path;
+        tvCardImg.src = poster_path ? IMG_URL + poster_path : 'img/no-poster.jpg';
+        tvCardImg.alt = name;
         modalTitle.textContent = name;
-        genresList.innerHTML = genres.reduce((acc, item) => `${acc}<li>${item.name}</li>`, '');
+        genresList.textContent = '';
+        genres.forEach(item => genresList.innerHTML += `<li>${item.name}</li>`);
         rating.textContent = vote_average;
         description.textContent = overview;
         modalLink.href = homepage;
