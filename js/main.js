@@ -140,6 +140,10 @@ leftMenu.addEventListener('click', event => {
     new DBService().getFiltered('on_the_air').then(response => renderCard(response, target));
   } else if (target.closest('#today')) {
     new DBService().getFiltered('airing_today').then(response => renderCard(response, target));
+  } else if (target.closest('#search')) {
+    tvShowsList.textContent = '';
+    tvShowsHead.textContent = '';
+    searchFormInput.focus();
   }
 
 });
@@ -169,7 +173,6 @@ tvShowsList.addEventListener('click', event => {
   const card = target.closest('.tv-card');
 
   if (card) {
-    preloader.style.display = 'block'; // показать прелоадер при рендеринге модалки
     new DBService()
       .getTvShow(card.parentElement.idTV) // поднимаемся к элементу списка li
       .then(data => {
@@ -195,7 +198,7 @@ tvShowsList.addEventListener('click', event => {
         modal.classList.remove('hide');
         document.body.style.overflow = 'hidden';
       })
-      .finally(() => preloader.style.display = 'none');
+      .finally(() => loading.remove()); // убираю прелоадер
   }
 });
 
