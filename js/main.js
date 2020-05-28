@@ -1,6 +1,7 @@
 'use strict';
 
 const IMG_URL = 'https://image.tmdb.org/t/p/w185_and_h278_bestv2';
+const SERVER = 'https://api.themoviedb.org/3';
 const API_KEY = '764f5f90718a44fc2bcf08b2dd691ef7';
 
 const leftMenu = document.querySelector('.left-menu'),
@@ -13,7 +14,9 @@ const leftMenu = document.querySelector('.left-menu'),
   genresList = document.querySelector('.genres-list'),
   rating = document.querySelector('.rating'),
   description = document.querySelector('.description'),
-  modalLink = document.querySelector('.modal__link');
+  modalLink = document.querySelector('.modal__link'),
+  searchForm = document.querySelector('.search__form'),
+  searchFormInput = searchForm.querySelector('.search__form-input');
 
 const loading = document.createElement('div');
 loading.className = 'loading';
@@ -37,8 +40,8 @@ class DBService {
     return this.getData('card.json');
   }
 
-  getSearchResult = () => {
-    return this.getData(`/search/company?api_key=`)
+  getSearchResult = (query) => {
+    return this.getData(`${SERVER}/search/tv?api_key=${API_KEY}&query=${query}&languege=ru-RU`)
   }
 };
 
@@ -74,6 +77,16 @@ const renderCard = response => {
 
 
 }
+
+searchForm.addEventListener('submit', event => {
+  event.preventDefault();
+  const value = searchFormInput.value.trim();
+  if (value) {
+    searchFormInput.value = '';
+    tvShows.append(loading);
+    new DBService().getSearchResult(value).then(renderCard);
+  }
+});
 
 {
   tvShows.append(loading);
@@ -131,7 +144,6 @@ tvShowsList.addEventListener('click', event => {
     new DBService()
       .getTestCard()
       .then(data => {
-        console.log(data);
         const {
           poster_path,
           name,
