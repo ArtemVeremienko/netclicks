@@ -19,7 +19,8 @@ const leftMenu = document.querySelector('.left-menu'),
   searchForm = document.querySelector('.search__form'),
   searchFormInput = searchForm.querySelector('.search__form-input'),
   preloader = document.querySelector('.preloader'),
-  dropdown = document.querySelectorAll('.dropdown');
+  dropdown = document.querySelectorAll('.dropdown'),
+  pagination = document.querySelector('.pagination');
 
 const loading = document.createElement('div');
 loading.className = 'loading';
@@ -27,6 +28,7 @@ loading.className = 'loading';
 
 class DBService {
   getData = async (url) => {
+    this.temp = url;
     tvShows.append(loading); // добавляет прелоадер для всех запросов
     const res = await fetch(url);
     if (res.ok) {
@@ -36,19 +38,21 @@ class DBService {
     }
   }
 
-  getTestData = () => this.getData('test.json');
+  getTestData = () => this.getData('test.json')
 
-  getTestCard = () => this.getData('card.json');
+  getSearchResult = query => this.getData(`${SERVER}/search/tv?api_key=${API_KEY}&query=${query}&language=ru-RU`)
 
-  getSearchResult = query => this.getData(`${SERVER}/search/tv?api_key=${API_KEY}&query=${query}&language=ru-RU`);
+  getNextPage = page => this.getData(`${this.temp}&page=${page}`)
 
-  getTvShow = id => this.getData(`${SERVER}/tv/${id}?api_key=${API_KEY}&language=ru-RU`);
+  getTvShow = id => this.getData(`${SERVER}/tv/${id}?api_key=${API_KEY}&language=ru-RU`)
 
-  getFiltered = filter => this.getData(`${SERVER}/tv/${filter}?api_key=${API_KEY}&language=ru-RU`);
+  getFiltered = filter => this.getData(`${SERVER}/tv/${filter}?api_key=${API_KEY}&language=ru-RU`)
 }
 
+const dbService = new DBService();
+
 const renderCard = (response, target) => {
-  const { results } = response;
+  const { results, total_pages } = response;
 
   tvShowsList.textContent = '';
 
@@ -87,6 +91,14 @@ const renderCard = (response, target) => {
     tvShowsHead.textContent = 'По вашему запросу сериалов не найдено 😢';
   }
 
+  pagination.textContent = '';
+
+  if (total_pages > 2) {
+    for (let i = 1; i <= total_pages; i++) {
+      pagination.innerHTML += `<li><a href="#" class="pages">${i}</a></li>`;
+    }
+  }
+
 
 }
 
@@ -95,12 +107,9 @@ searchForm.addEventListener('submit', event => {
   const value = searchFormInput.value.trim();
   if (value) {
     searchFormInput.value = '';
-    new DBService().getSearchResult(value).then(renderCard);
+    dbService.getSearchResult(value).then(renderCard);
   }
 });
-
-// начальная страница с карточками
-new DBService().getTestData().then(renderCard);
 
 
 // закрытие пунктов меню
@@ -133,13 +142,13 @@ leftMenu.addEventListener('click', event => {
   }
 
   if (target.closest('#top-rated')) {
-    new DBService().getFiltered('top_rated').then(response => renderCard(response, target));
+    dbService.getFiltered('top_rated').then(response => renderCard(response, target));
   } else if (target.closest('#popular')) {
-    new DBService().getFiltered('popular').then(response => renderCard(response, target));
+    dbService.getFiltered('popular').then(response => renderCard(response, target));
   } else if (target.closest('#week')) {
-    new DBService().getFiltered('on_the_air').then(response => renderCard(response, target));
+    dbService.getFiltered('on_the_air').then(response => renderCard(response, target));
   } else if (target.closest('#today')) {
-    new DBService().getFiltered('airing_today').then(response => renderCard(response, target));
+    dbService.getFiltered('airing_today').then(response => renderCard(response, target));
   } else if (target.closest('#search')) {
     tvShowsList.textContent = '';
     tvShowsHead.textContent = '';
@@ -210,3 +219,14 @@ modal.addEventListener('click', event => {
     document.body.style.overflow = '';
   }
 });
+
+// обработка кликов по пагинации
+pagination.addEventListener('click', event => {
+  event.preventDefault();
+  const link = event.target.closest('.pages');
+  if (!link) return;
+  dbService.getNextPage(link.textContent).then(renderCard);
+});
+
+// начальная страница с карточками
+dbService.getFiltered('airing_today').then(renderCard);
