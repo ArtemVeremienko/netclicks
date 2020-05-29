@@ -40,7 +40,7 @@ class DBService {
 
   saveQuery = (url) => this.temp = url.includes('page') ?
     url.slice(0, -6 - this.page.length) :
-    url; // при наличии перехода, удаляем
+    url; // при наличии &page=..., удаляет его из temp
 
   getTestData = () => this.getData('test.json')
 
@@ -100,7 +100,7 @@ const renderCard = (response, target) => {
 
   pagination.textContent = '';
 
-  if (total_pages > 2) {
+  if (total_pages > 1) {
     for (let i = 1; i <= total_pages; i++) {
       pagination.innerHTML += `<li><a href="#" class="pages">${i}</a></li>`;
     }
